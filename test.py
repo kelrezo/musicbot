@@ -5,7 +5,7 @@ import json
 from discord import Game
 from discord.ext.commands import Bot
 
-with open("musicbot\\config.json") as f:
+with open("config.json") as f:
     data = json.load(f)
 
 
@@ -39,11 +39,20 @@ async def list_servers():
 async def play(ctx):
   url = 'https://www.youtube.com/watch?v=7KJjVMqNIgA'
   server  = ctx.message.server
-  vc = client.voice_client_in(server)
-  player = await vc.create_ytdl_player(url)
-  players[ctx.message.server.id] = player
-  if(not client.is_voice_connected):
-    join(ctx)
+
+  #client.voice_client_in(server)
+  #if(client.is_voice_connected == False):
+  author = ctx.message.author
+  voice_channel = author.voice_channel
+  #try: 
+  vc = await client.join_voice_channel(voice_channel)
+  #except Exception as e:
+    #print(str(e))
+  
+  player = await voice_channel.create_ytdl_player(url)
+  players[server.id] = player
+  #if(not client.is_voice_connected):
+  #  join(ctx)
 
   #playlist.push(player)
   #if playlist == []:        
@@ -80,7 +89,7 @@ async def leave(ctx):
 
 
 @client.command(pass_context=True)
-async def queue(ctx)
+async def queue(ctx):
   id = ctx.message.server.id
 
 
