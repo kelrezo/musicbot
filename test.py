@@ -44,12 +44,16 @@ async def list_servers():
 async def play(ctx):
   
   server  = ctx.message.server
+  '''
   author = ctx.message.author
   voice_channel = author.voice_channel
   try:
     await client.join_voice_channel(voice_channel)
   except Exception as e:
-    await client.say("I'm already in a voice channel.")
+    await client.say("Come join me on")
+
+  '''
+  voic_channel = client.voice_client_in(server)
   player = await voice_channel.create_ytdl_player(url,after=lambda:check_queue(server.id))
   players[server.id] = player
   player.start()
