@@ -8,7 +8,7 @@ from discord.ext.commands import Bot
 with open("config.json") as f:
     data = json.load(f)
 
-
+url = 'https://www.youtube.com/watch?v=7KJjVMqNIgA'
 BOT_PREFIX = ("?", "!")
 TOKEN = data['client']['botToken'] 
 
@@ -19,6 +19,11 @@ players = {}
 playlist = {}
 
 
+def check_queue(id):
+    if playlist[id] != []:
+      player = playlist[id].pop(0)
+      players[id] = player
+      player.start()
 
 @client.event
 async def on_ready():
@@ -37,26 +42,16 @@ async def list_servers():
 
 @client.command(pass_context=True)
 async def play(ctx):
-  url = 'https://www.youtube.com/watch?v=7KJjVMqNIgA'
+  
   server  = ctx.message.server
-
-  #client.voice_client_in(server)
-  #if(client.is_voice_connected == False):
   author = ctx.message.author
   voice_channel = author.voice_channel
-  #try: 
-  vc = await client.join_voice_channel(voice_channel)
-  #except Exception as e:
-    #print(str(e))
-  
-  player = await voice_channel.create_ytdl_player(url)
+  try:
+    await client.join_voice_channel(voice_channel)
+  except Exception as e:
+    await client.say("I'm already in a voice channel.")
+  player = await voice_channel.create_ytdl_player(url,after=lambda:check_queue(server.id))
   players[server.id] = player
-  #if(not client.is_voice_connected):
-  #  join(ctx)
-
-  #playlist.push(player)
-  #if playlist == []:        
-  
   player.start()
 
 
@@ -90,8 +85,15 @@ async def leave(ctx):
 
 @client.command(pass_context=True)
 async def queue(ctx):
-  id = ctx.message.server.id
+  server = ctx.message.server.id
+  vc = client.voice_client_in(server)
+  player = await vc.create_ytdl_player(url)
 
+  if server.id in playlist:
+    playlist[server.id].append(player)
+  else:
+    playlist[server.id]=[player]
 
+  await client.say("Queued: "+url)
 client.loop.create_task(list_servers())
 client.run(TOKEN)
