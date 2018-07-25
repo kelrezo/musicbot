@@ -5,8 +5,12 @@ import json
 from discord import Game
 from discord.ext.commands import Bot
 
+with open("musicbot\\config.json") as f:
+    data = json.load(f)
+
+
 BOT_PREFIX = ("?", "!")
-TOKEN = ""  
+TOKEN = data['client']['botToken'] 
 
 client = Bot(command_prefix=BOT_PREFIX)
 players = {}
